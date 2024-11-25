@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background: url('regbg.jpg') no-repeat center center; /* Center the image */
+            background-size: cover; /* Make sure the image covers the whole viewport */
+            color: white;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: linear-gradient(to right, #0072B5, #4ca1af);
+            padding: 40px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 100%;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        label {
+            margin-top: 10px;
+            display: block;
+        }
+        .error {
+            color: #ff4d4d;
+            font-size: 0.9em;
+        }
+        #ahpraContainer {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Register</h2>
+        <form id="registrantInfo">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName" autocomplete="off" required>
+            
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" autocomplete="off" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" autocomplete="off" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" autocomplete="off" required>
+            
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="off" required>
+            
+            <label for="dob">Date of Birth (DD-MM-YYYY):</label>
+            <input type="text" id="dob" name="dob" placeholder="DD-MM-YYYY" autocomplete="off" required>
+            
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender" required>
+                <option value="">Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+                <option value="preferNotToSay">Prefer not to say</option>
+            </select>
+
+            <label for="occupation">Occupation:</label>
+            <select id="occupation" name="occupation" required>
+                <option value="">Select</option>
+                <option value="oncologist">Oncologist</option>
+                <option value="patient">Patient</option>
+                <option value="researcher">Researcher</option>
+            </select>
+
+            <div id="ahpraContainer" style="display:none;">
+                <label for="ahpraNumber">AHPRA No. (Oncologists only):</label>
+                <input type="text" id="ahpraNumber" name="ahpraNumber">
+            </div>
+
+            <input type="submit" value="Register now!">
+        </form>
+        <p>Already have an account? <a href="login.html" style="color: #007bff;">Login here</a>.</p>
+    </div>
+
+    <script>
+        // Toggle AHPRA field visibility
+        function toggleAHPRAField() {
+            const occupation = document.getElementById("occupation").value;
+            const ahpraContainer = document.getElementById("ahpraContainer");
+
+            if (occupation === "oncologist") {
+                ahpraContainer.style.display = "block";
+                document.getElementById("ahpraNumber").setAttribute("required", "required");
+            } else {
+                ahpraContainer.style.display = "none";
+                document.getElementById("ahpraNumber").removeAttribute("required");
+            }
+        }
+
+        // Register the user
+        document.getElementById("registrantInfo").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const user = {
+                firstName: formData.get("firstName"),
+                lastName: formData.get("lastName"),
+                email: formData.get("email"),
+                password: formData.get("password"),
+                confirmPassword: formData.get("confirmPassword"),
+                dob: formData.get("dob"),
+                gender: formData.get("gender"),
+                occupation: formData.get("occupation"),
+                ahpraNumber: formData.get("ahpraNumber")
+            };
+
+            // Check if passwords match
+            if (user.password !== user.confirmPassword) {
+                alert("Passwords do not match.");
+                return;
+            }
+
+            // Store user data in localStorage
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            users.push(user);
+            localStorage.setItem('users', JSON.stringify(users));
+
+            alert("Registration successful!");
+            window.location.href = "login.html"; // Redirect to login page
+        });
+    </script>
+</body>
+</html>
