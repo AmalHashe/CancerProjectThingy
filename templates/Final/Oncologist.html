@@ -1179,14 +1179,14 @@
             patientDetailInfo.innerHTML = `
                 <p><strong>Patient ID:</strong> ${patient[0]}</p>
                 <p><strong>Name:</strong> ${patient[1]} ${patient[2]}</p>
-                <p><strong>Age:</strong> ${patient[6]}</p>
-                <p><strong>Sex:</strong> ${patient[7]}</p>
-                <p><strong>Place of Birth:</strong> ${patient[5]}</p>
-                <p><strong>Country Residing:</strong> ${patient[4]}</p>
-                <p><strong>Diagnosis:</strong> ${patient[9]}</p>
-                <p><strong>Treatment:</strong> ${patient[8]}</p>
-                <p><strong>Stage:</strong> ${patient[11]}</p>
-                <p><strong>Outcome:</strong> ${patient[12]}</p>
+                <p><strong>Age:</strong> ${patient[5]}</p>
+                <p><strong>Sex:</strong> ${patient[6]}</p>
+                <p><strong>Place of Birth:</strong> ${patient[4]}</p>
+                <p><strong>Country Residing:</strong> ${patient[3]}</p>
+                <p><strong>Diagnosis:</strong> ${patient[8]}</p>
+                <p><strong>Treatment:</strong> ${patient[7]}</p>
+                <p><strong>Stage:</strong> ${patient[10]}</p>
+                <p><strong>Outcome:</strong> ${patient[11]}</p>
             `;
 
             // Show the overlay and details section
@@ -1212,7 +1212,7 @@
             // Populate list with patient data
             patientsList.forEach(patient => {
                 const row = document.createElement('li'); // Using <li> for the existing-patient-list
-                row.textContent = `Name: ${patient[1]} ${patient[2]}, Age: ${patient[4]}, Diagnosis: ${patient[8]}`;
+                row.textContent = `Name: ${patient[1]} ${patient[2]}, Age: ${patient[5]}, Diagnosis: ${patient[8]}`;
 
                 // Make each name clickable
                 row.style.cursor = 'pointer';
