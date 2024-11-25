@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancer Risk Prediction</title>
+    <style>
+        /* Basic styling for layout and form */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 200px;
+            background-color: #4ca1af;
+            padding-top: 20px;
+            border-top-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+            transition: background-color 0.3s;
+            border-radius: 5px;
+        }
+
+        .sidebar a:hover {
+            background-color: #575757;
+        }
+
+        .content {
+            margin-left: 200px;
+            padding: 20px;
+            width: 100%;
+            background-color: #f4f4f4;
+            min-height: 100vh;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 30px auto;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 98%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4ca1af;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #387e8b;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #e3f2fd;
+            color: #0d47a1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar for navigation -->
+    <div class="sidebar">
+        <a href="Oncologist.html">Home</a>
+        <a href="CancerPrediction.html">Cancer Prediction</a>
+    </div>
+
+    <!-- Main content -->
+    <div class="content">
+        <div class="form-container">
+            <h2>Cancer Risk Prediction Form</h2>
+            <form id="patientForm">
+                <label for="gene_expression_1">Gene Expression 1:</label>
+                <input type="number" step="any" id="gene_expression_1" name="gene_expression_1" required>
+
+                <label for="gene_expression_2">Gene Expression 2:</label>
+                <input type="number" step="any" id="gene_expression_2" name="gene_expression_2" required>
+
+                <label for="dna_methylation">DNA Methylation:</label>
+                <input type="number" step="any" id="dna_methylation" name="dna_methylation" required>
+
+                <label for="miRNA_expression">miRNA Expression:</label>
+                <input type="number" step="any" id="miRNA_expression" name="miRNA_expression" required>
+
+                <button type="button" onclick="submitForm()">Submit</button>
+            </form>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function submitForm() {
+            const form = document.getElementById('patientForm');
+            const formData = new FormData(form);
+            const data = {};
+
+            // Convert form data to JSON
+            formData.forEach((value, key) => {
+                data[key] = parseFloat(value); // Convert inputs to numbers
+            });
+
+            console.log("Sending data:", data); // Debugging log
+
+            // Make POST request to `/process-data`
+            fetch('/process-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json()) // Parse JSON from the response
+            .then(result => {
+                console.log(result); // Debugging log for result
+
+                // Display the result on the webpage
+                if (result.status === 'success') {
+                    const accuracy = result.prediction_list;
+                    const prediction = result.accuracy; // ISSUE HERE
+
+                    document.getElementById('result').innerHTML =
+                        `<h3>Prediction Result:</h3>
+                        <p><strong>Prediction:</strong> ${prediction}</p>
+                        <p><strong>Accuracy:</strong> ${accuracy.toFixed(3)}</p>`;
+                } else {
+                    document.getElementById('result').innerHTML =
+                        `<h3>Error:</h3><p>${result.message}</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML =
+                    `<h3>Request failed:</h3><p>${error}</p>`;
+            });
+        }
+    </script>
+</body>
+</html>

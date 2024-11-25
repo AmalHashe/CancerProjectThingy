@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Left Tab Navigation</title>
+        <style>
+            /* Basic styling for body */
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                display: flex;
+            }
+
+            /* Sidebar styling */
+            .sidebar {
+                position: fixed;
+                top: 0; /* Aligns it to the top of the viewport */
+                left: 0; /* Aligns it to the left of the viewport */
+                height: 100vh; /* Makes it span the full height of the viewport */
+                width: 200px;
+                background-color: #4ca1af;
+                padding-top: 20px;
+                border-top-right-radius: 15px;
+                border-bottom-right-radius: 15px;
+                box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            }
+
+            .sidebar a {
+                padding: 15px 20px;
+                text-decoration: none;
+                font-size: 18px;
+                color: white;
+                display: flex;
+                align-items: center;
+                transition: background-color 0.3s;
+                border-radius: 5px;
+            }
+
+            .sidebar a:hover {
+                background-color: #575757;
+            }
+
+            /* Main content styling */
+            .content {
+                margin-left: 200px; /* Pushes the content to the right to make space for the sidebar */
+                box-sizing: border-box; /* Ensures padding is included in width calculations */
+            }
+
+            .content {
+                flex-grow: 1;
+                padding: 20px;
+                background-color: #f4f4f4;
+                border-top-left-radius: 15px;
+                border-bottom-left-radius: 15px;
+                box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            }
+            /* General Box Styling */
+            .mutational-profiles, .patient-info {
+                background-color: #fff;
+                padding: 15px;
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                margin-top: 20px;
+                border: 2px solid #8779b2; /* Matches sidebar color */
+            }
+
+            /* Headings Styling */
+             .mutational-profiles h2, .patient-info h2 {
+                color: #333;
+                margin-bottom: 15px; /* Consistent space after heading */
+            }
+
+           
+            /* Patient Info Wrapper */
+            .patient-info {
+                display: flex;
+                flex-direction: column;
+                gap: 20px; /* Adds spacing between sections */
+            }
+
+            /* New Patient Section Styling */
+            .new-patient-form {
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                border: 2px solid #4ca1af;
+                margin-bottom: 20px; /* Adds space between the sections */
+            }
+
+            /* Existing Patients Section Styling */
+            .existing-patients-form {
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                border: 2px solid #4ca1af;
+            }
+
+            /* List Styling */
+             .mutational-profiles .patient-list, .existing-patient-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+             .mutational-profiles .patient-list li, .existing-patient-list li {
+                padding: 10px;
+                margin-bottom: 10px;
+                background-color: #e9ecef;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .mutational-profiles .patient-list li:hover, 
+            .existing-patient-list li:hover {
+                background-color: #c7c7de;
+            }
+
+            /* Form Styling */
+            .new-patient-form label {
+                font-weight: bold;
+                margin-top: 10px;
+                display: block;
+            }
+
+            .new-patient-form input,
+            .new-patient-form select {
+                width: 100%;
+                padding: 8px;
+                margin-top: 5px;
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+
+            .new-patient-form button {
+                background-color: #8779b2;
+                color: #fff;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .new-patient-form button:hover {
+                background-color: #6b639a;
+            }
+
+            /* Profile pop-up styling */
+            .profile-popup {
+                display: block; /* Ensure it is visible */
+                position: fixed;
+                top: 0;
+                right: -350px; /* Hidden by default */
+                width: 300px;
+                height: 100vh;
+                background-color: #fff;
+                box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+                padding: 20px;
+                border-top-left-radius: 15px;
+                border-bottom-left-radius: 15px;
+                transition: right 0.3s; /* Smooth transition when it slides */
+                z-index: 1000;
+                overflow-y: auto; /* Allows vertical scrolling when content overflows */
+            }
+
+            /* Show the profile pop-up */
+            .profile-popup.show {
+                right: 0; /* Bring it into view */
+            }
+
+
+            .profile-popup h2 {
+                color: #333;
+                margin-top: 0;
+            }
+
+            /* Vertical label for profile pop-up */
+            .profile-label {
+                writing-mode: vertical-rl;
+                text-align: center;
+                padding: 15px;
+                background-color: #8779b2;
+                color: white;
+                font-weight: bold;
+                cursor: pointer;
+                border-top-left-radius: 15px;
+                border-bottom-left-radius: 15px;
+                position: fixed;
+                right: -80px; 
+                top: 50%;
+                transform: translateY(-50%);
+                transform: translateX(-170%);
+                transition: background-color 0.3s, right 0.3s; /* Add transition for smooth movement */
+                z-index: 100; /* Ensures it is above other elements */
+            }
+
+            .profile-label:hover {
+                background-color: #575757;
+            }
+
+            /* Profile picture container */
+            .profile-pic {
+                width: 150px;
+                height: 150px;
+                border-radius: 50%; /* Makes it circular */
+                overflow: hidden; /* Ensures the image stays within the circle */
+                margin: 0 auto 10px;
+                border: 2px solid #8779b2; /* Optional: adds a border around the picture */
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: #e9ecef;
+            }
+
+            /* Image inside the profile picture container */
+            .profile-pic img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover; /* Ensures the image fills the circle without distortion */
+            }
+
+            /* Profile info styling */
+            .profile-info {
+                margin: 10px 0;
+                color: #333;
+            }
+
+            .profile-qualifications {
+                margin-top: 20px;
+                padding-top: 10px;
+                border-top: 1px solid #ccc;
+            }
+
+            .profile-qualifications h3 {
+                margin-bottom: 10px;
+                color: #333;
+            }
+
+            #qualifications-container {
+                margin-top: 10px;
+            }
+
+            #qualifications-list {
+                list-style: none;
+                padding: 0;
+            }
+
+            #qualifications-list li {
+                margin: 5px 0;
+                background-color: #e9ecef;
+                padding: 8px;
+                border-radius: 5px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            #qualifications-list li button {
+                background-color: #8779b2;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            #qualifications-list li button:hover {
+                background-color: #575757;
+            }
+
+            .qualification-section {
+                margin-top: 10px;
+            }
+
+            .toggle-btn {
+                background-color: #8779b2;
+                color: white;
+                border: none;
+                padding: 10px;
+                width: 100%;
+                text-align: left;
+                font-size: 16px;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+
+            .toggle-btn:hover {
+                background-color: #575757;
+            }
+
+            .qualification-content {
+                display: none;
+                margin-top: 10px;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                background-color: #f9f9f9;
+            }
+
+            #licenses-list, #oncology-certification-list, #first-aid-list, 
+            #children-check-list, #other-list {
+                list-style: none;
+                padding: 0;
+            }
+
+            #licenses-list li, #oncology-certification-list li, #first-aid-list li, 
+            #children-check-list li, #other-list li {
+                margin: 5px 0;
+                background-color: #e9ecef;
+                padding: 8px;
+                border-radius: 5px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            #licenses-list li button, #oncology-certification-list li button, 
+            #first-aid-list li button, #children-check-list li button, 
+            #other-list li button {
+                background-color: #8779b2;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            #licenses-list li button:hover, #oncology-certification-list li button:hover, 
+            #first-aid-list li button:hover, #children-check-list li button:hover, 
+            #other-list li button:hover {
+                background-color: #575757;
+            }
+
+            /* Styling for logo */
+            .sidebar .logo {
+                text-align: center;
+                margin-bottom: 20px; /* Add some space below the logo */
+            }
+
+            #sidebar-logo {
+                width: 80%; /* Adjust the width of the logo */
+                max-width: 150px; /* Maximum width of the logo */
+                height: auto; /* Maintain aspect ratio */
+            }
+
+            /* Styling for logout button */
+            .logout-btn {
+                position: absolute;
+                bottom: 20px;
+                width: 80%;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 10px;
+                font-size: 16px;
+                color: white;
+                background-color: #428c97;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .logout-btn:hover {
+                background-color: #575757;
+            }
+
+            /* Mutational profiles styling */
+            .mutational-profiles {
+                margin-top: 50px;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                text-align: center;
+            }
+
+            .mutational-profiles h2 {
+                font-size: 28px;
+                color: #003b44;
+                margin-bottom: 20px;
+            }
+
+            #mutation-list {
+                list-style: none;
+                padding: 0;
+            }
+
+            #mutation-list li {
+                background-color: #f9f9f9;
+                padding: 10px;
+                margin: 10px 0;
+                border-radius: 5px;
+                box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+                font-size: 16px;
+            }
+
+            #mutation-list li strong {
+                color: #005f72;
+            }
+
+            #chart-container {
+                display: flex;
+                justify-content: center; /* Centers horizontally */
+                align-items: center; /* Centers vertically */
+                height: 100;
+            }
+
+            /* Style for search input and button */
+            .search-input {
+                padding: 10px;
+                margin-right: 10px;
+                margin-bottom: 10px;
+                font-size: 16px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+                width: 200px;
+            }
+
+            /* The overlay background */
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: none;
+                z-index: 1000;
+            }
+
+            /* Patient details container (modal or section) */
+            .patient-details {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                color: black;
+                padding: 20px;
+                border-radius: 5px;
+                width: 300px;
+                z-index: 1001;
+            }
+
+            #patient-detail-info {
+                margin-top: 20px;
+            }
+
+            #close-details {
+                background-color: red;
+                color: white;
+                padding: 10px;
+                border: none;
+                cursor: pointer;
+            }
+
+            #close-details:hover {
+                background-color: darkred;
+            }
+
+            .data-card {
+                background: white;
+                border: 1px solid #ddd;
+                padding: 15px;
+                border-radius: 10px;
+                margin-bottom: 15px;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            
+            .data-card h4 {
+                margin: 0 0 10px 0;
+                color: #773a96;
+            }
+            
+            .data-card p {
+                margin: 5px 0;
+                color: #333;
+            }
+
+
+            /* CSS for Publications */
+            #papers {
+                margin-top: -60px;
+                margin-left: -240px; /* Adjust to move the box more to the left */
+                padding: 20px; /* Add padding inside the box */
+                border: 2px solid #ccc; /* Add a border around the publications section */
+                border-radius: 8px; /* Optional: round the corners of the box */
+                background-color: #f9f9f9; /* Optional: light background color for the box */
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for a 3D effect */
+            }
+
+            .publications-link ul {
+                list-style-type: none;
+                padding: 0;
+            }
+
+            .publications li {
+                margin-bottom: 5px;
+                margin-left: -10px;
+            }
+
+            .publications li a {
+                color: #007bff;
+                text-decoration: none;
+            }
+
+            .publications li a:hover {
+                text-decoration: underline;
+            }
+
+            #highlighted-papers ul {
+                padding-left: 20px;
+            }
+
+        </style>
+    </head>
+
+    <body>
+    <!-- Profile Pop-up Sidebar -->
+    <div class="profile-popup" id="profile-popup">
+        <div class="profile-pic">
+            <img src="bob.jpg" alt="Profile Picture">
+        </div>
+            
+    <h2>Bob</h2>
+        <div class="profile-info">
+            <p><strong>Research Area:</strong> Oncology</p>
+            <p><strong>Academic Qualifications:</strong> PhD in Oncology</p>
+            <p><strong>Experience:</strong> Over 15 years of experience in cancer research and clinical studies</p>
+            <p><strong>Affiliations:</strong> Member of the American Association for Cancer Research (AACR)</p>
+            <p><strong>Contact Information:</strong> (03) 3727 6627</p>
+        </div>
+        <!-- Qualifications Section -->
+        <div class="profile-qualifications">
+            <h3>Qualifications</h3>
+            
+            <!-- Section for PhD Qualification -->
+            <div class="qualification-section" id="phd-qualification">
+                <button class="toggle-btn">PhD in Oncology (or Relevant Field)</button>
+                <div class="qualification-content">
+                    <iframe src="PhD_Qualification.pdf" width="100%" height="600px"></iframe>
+                    <label for="upload-phd">Upload PhD Certificate (PDF):</label>
+                    <input type="file" id="upload-phd" accept="application/pdf">
+                    <ul id="phd-qualification-list"></ul>
+                </div>
+            </div>
+        
+            <!-- Section for Research Publications -->
+            <div class="qualification-section" id="research-publications">
+                <button class="toggle-btn">Research Publications</button>
+                <div class="qualification-content">
+                    <iframe src="Research_Publications.pdf" width="100%" height="600px"></iframe>
+                    <label for="upload-research-pubs">Upload Research Publications (PDF):</label>
+                    <input type="file" id="upload-research-pubs" accept="application/pdf">
+                    <ul id="research-publications-list"></ul>
+                </div>
+            </div>
+        
+            <!-- Section for Conference Presentations -->
+            <div class="qualification-section" id="conference-presentations">
+                <button class="toggle-btn">Conference Presentations</button>
+                <div class="qualification-content">
+                    <iframe src="Conference_Presentations.pdf" width="100%" height="600px"></iframe>
+                    <label for="upload-conference-presentations">Upload Conference Presentations (PDF):</label>
+                    <input type="file" id="upload-conference-presentations" accept="application/pdf">
+                    <ul id="conference-presentations-list"></ul>
+                </div>
+            </div>
+
+            <!-- Section for Other Academic or Research Qualifications -->
+            <div class="qualification-section" id="other">
+                <button class="toggle-btn">Other Academic/Research Qualifications</button>
+                <div class="qualification-content">
+                    <label for="upload-other">Upload Other Qualifications (PDF):</label>
+                    <input type="file" id="upload-other" accept="application/pdf">
+                    <ul id="other-list"></ul>
+                </div>
+            </div>
+        </div>        
+    </div>
+            <!-- Vertical Profile Label -->
+            <div class="profile-label" id="profileLabel">My Profile</div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Logo -->
+                <div class="logo">
+                    <img src="logo.png" alt="Logo" id="sidebar-logo">
+                </div>
+
+                <!-- Sidebar Links -->
+                <a href="#" id="homepage-link">Homepage</a>
+                <a href="#" id="patient-info-link">Patient Info</a>
+                <a href="#" id="publications-link">Papers & Publications</a>
+                <a href="http://127.0.0.1:5000/CancerPrediction" id="cancer-prediction-link">Cancer Prediction</a>
+                <!-- Logout Button -->
+                <button id="logout-btn" class="logout-btn">Logout</button>
+            </div>
+
+
+        <!-- Main Content -->
+        <div class="content">
+            <h1 id="greeting">Welcome back</h1>
+
+            <!-- Mutational Profiles Section -->
+            <div class="mutational-profiles" id="mutational-profiles">
+                <h2>Mutational Profiles</h2>
+                
+                <!-- Explanation Text -->
+                <p>This section visualizes the distribution of mutational profiles across different chromosomes, genes, mutation locations, and other relevant genetic factors. The bar chart below provides insights into the frequency of various mutations observed in the dataset, with the option to filter by chromosome, gene, mutation location, mutation type, mutation effect, mutation status, variant allele frequency, and clinical variation annotations. By using the filter options, researchers can tailor the displayed data to their specific areas of interest and explore how these mutations correlate with various genetic traits and diseases.</p>
+                
+                <!-- Filter Dropdown -->
+                <label for="filter">Filter By:</label>
+                <select id="filter">
+                    <option value="Chromosome">Chromosome</option>
+                    <option value="Gene">Gene</option>
+                    <option value="MutationLocation">Location</option>
+                    <option value="MutationType">Type of Mutation</option>
+                    <option value="MutationEffect">Effects of Mutation</option>
+                    <option value="MutationStatus">Mutation Status</option>
+                    <option value="VariantAlleleFrequency">Variant Allele Frequency</option>
+                    <option value="ClinVarAnnotation">Clinical Variation Annotation</option> 
+                </select>
+                
+                <button id="search-btn">Search</button>
+                <ul id="mutation-list" style="display:none;"></ul> <!-- Initially hidden -->
+                
+                <div id="chart-container">
+                    <canvas id="pie-chart"></canvas>
+                </div>
+            </div>
+
+
+        <!-- Patient Info Section (New Profile and Existing Patients) -->
+        <div class="patient-info" id="patient-info">
+            <h2>Patient Info</h2>
+            <!-- New Patient Profile Form -->
+            <div class="new-patient-form">
+                <h3>Create New Patient Profile</h3>
+            
+                <label for="first-name">First Name:</label>
+                <input type="text" id="first-name" placeholder="Enter first name">
+            
+                <label for="last-name">Last Name:</label>
+                <input type="text" id="last-name" placeholder="Enter last name">
+            
+                <label for="country-residing">Country Residing:</label>
+                <input type="text" id="country-residing" placeholder="Enter country of residence">
+            
+                <label for="place-of-birth">Place of Birth:</label>
+                <input type="text" id="place-of-birth" placeholder="Enter place of birth">
+            
+                <label for="age">Age:</label>
+                <input type="number" id="age" placeholder="Enter age">
+            
+                <label for="sex">Sex:</label>
+                <select id="sex">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            
+                <label for="treatment">Treatment:</label>
+                <input type="text" id="treatment" placeholder="Enter treatment details">
+            
+                <label for="diagnosis">Diagnosis:</label>
+                <input type="text" id="diagnosis" placeholder="Enter diagnosis">
+            
+                <label for="label">Label:</label>
+                <input type="text" id="label" placeholder="Enter label">
+            
+                <label for="stage">Stage:</label>
+                <input type="text" id="stage" placeholder="Enter stage">
+            
+                <label for="outcome">Outcome:</label>
+                <input type="text" id="outcome" placeholder="Enter outcome">
+            
+                <button id="create-profile">Create Profile</button>
+            </div>
+            
+            <!-- Existing Patients List with Search -->
+            <div class="existing-patients">
+                <h3>View Existing Patients</h3>
+                <p>You can search by patient first name, last name, or diagnosis.</p>
+                <input type="text" id="search-input" placeholder="Search patients..." class="search-input">
+                <ul class="existing-patient-list" id="existing-patient-list">
+                    <!-- Patient entries will be dynamically generated here -->
+                </ul>
+            </div>
+
+            <div id="overlay" style="display: none;"></div>
+
+            <!-- Patient details container (initially hidden) -->
+            <div id="patient-details" class="patient-details" style="display:none;">
+                <h3>Patient Details</h3>
+                <div id="patient-detail-info"></div>
+                <button id="close-details">Close</button>
+            </div>
+        </div>
+
+    <div class="content">
+    <!-- Publications Section -->
+    <div class="publications" id="papers">
+        <h2>Publications</h2>
+        
+        <p>Welcome to the publications section. Here, you will find resources that provide access to a vast collection of academic papers, articles, and research studies related to your field. These resources are invaluable for staying updated on the latest scientific advancements.</p>
+
+        <h3>External Resources</h3>
+        <p>Below are some reputable platforms where you can find a wealth of research papers and academic resources:</p>
+        <ul>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank">PubMed</a> - A free resource developed and maintained by the National Center for Biotechnology Information (NCBI), PubMed offers access to a comprehensive collection of biomedical literature.</li>
+            <li><a href="https://scholar.google.com/" target="_blank">Google Scholar</a> - A freely accessible web search engine that indexes scholarly articles, theses, books, conference papers, and patents across various disciplines.</li>
+            <li><a href="https://www.ncbi.nlm.nih.gov/" target="_blank">NCBI</a> - The National Center for Biotechnology Information provides access to a wide range of resources related to molecular biology, genetics, and more.</li>
+            <li><a href="https://www.researchgate.net/" target="_blank">ResearchGate</a> - A professional network for scientists and researchers, ResearchGate allows members to share papers, ask and answer questions, and find collaborators.</li>
+            <li><a href="https://www.nature.com/" target="_blank">Nature</a> - A leading science journal offering high-impact research across various fields such as biology, chemistry, physics, and medicine.</li>
+            <li><a href="https://www.sciencedirect.com/" target="_blank">ScienceDirect</a> - A leading full-text scientific database offering journal articles and book chapters from various disciplines, particularly life sciences, physical sciences, and health.</li>
+        </ul>
+
+        <h3>Highlighted Papers</h3>
+        <p>Here are some papers that have been recently highlighted for their relevance and contributions to the field:</p>
+        <div id="highlighted-papers">
+            <ul>
+                <li>
+                    <strong>The Role of AI in Drug Discovery: Challenges, Opportunities, and Strategies</strong><br>
+                    Authors: Alexandre Blanco-González, Alfonso Cabezón, Alejandro Seco-González, Daniel Conde-Torres, Paula Antelo-Riveiro, Ángel Piñeiro, Rebeca Garcia-Fandino<br>
+                    Published: NIH | 2023<br>
+                    Synopsis: Artificial intelligence (AI) has the potential to revolutionize the drug discovery process, offering improved efficiency, accuracy, and speed. However, the successful application of AI is dependent on the availability of high-quality data, the addressing of ethical concerns, and the recognition of the limitations of AI-based approaches. This review highlights the potential of AI in drug discovery, providing insights into the challenges and opportunities for realizing its potential in this field. The article also discusses the use of data augmentation, explainable AI, and the integration of AI with traditional experimental methods.<br>
+                    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10302890/#:~:text=By%20using%20AI%20algorithms%20to,the%20needs%20of%20individual%20patients" target="_blank">Read more</a>
+                </li>
+                <li>
+                    <strong>Immunotherapy: The future of cancer treatment</strong><br>
+                    Authors: Manisha Sahu, Hemakumari Suryawanshi<br>
+                    Published: NIH | 2021<br>
+                    Synopsis: Head and neck squamous cell carcinomas (HNSCCs) are one of the most common cancers worldwide. The article explores the role of immunotherapy in treating cancer, particularly HNSCC. It discusses the immune system's role in cancer progression and the development of new immunotherapeutic treatments that have the potential to improve cancer outcomes.<br>
+                    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8491352/" target="_blank">Read more</a>
+                </li>
+                <li>
+                    <strong>Implementing genomic medicine in the clinic: the future is here</strong><br>
+                    Authors: Teri A. Manolio MD, PhD, Rex L. Chisholm PhD, Brad Ozenberger PhD, Dan M. Roden MD, Marc S. Williams MD, Richard Wilson PhD, and others<br>
+                    Published: Nature | 2013<br>
+                    Synopsis: This article discusses the integration of genomic findings into clinical care, the challenges faced by institutions in implementing genomic medicine, and the infrastructure and research needs to overcome these obstacles. It emphasizes the importance of structured collaboration in advancing genomic medicine programs.<br>
+                    <a href="https://www.nature.com/articles/gim2012157" target="_blank">Read more</a>
+                </li>
+            </ul>
+        </div>        
+    </div>
+
+
+
+
+    </body>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.6.2/dist/sql-wasm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Set up greeting message with username from localStorage
+        localStorage.setItem('userName', 'Bob');
+        document.getElementById('greeting').innerText = `Welcome back, Dr. ${localStorage.getItem('userName')}!`;
+
+        // Function to show sections conditionally
+        function handleLinkClick(sectionId) {
+            // Log to check which section is being clicked
+            console.log('Section clicked:', sectionId);
+
+            // Hide all sections initially
+            document.getElementById('mutational-profiles').style.display = 'none';
+            document.getElementById('patient-info').style.display = 'none';
+            document.getElementById('chart-container').style.display = 'none'; // Hide pie chart container by default
+            document.getElementById('papers').style.display = 'none'; // Hide publications section
+
+
+            // Show relevant sections based on clicked link
+            if (sectionId === 'homepage') {
+                console.log('Displaying homepage sections');
+                document.getElementById('mutational-profiles').style.display = 'block';
+                document.getElementById('chart-container').style.display = 'block'; // Show pie chart container on homepage
+                document.getElementById('greeting').innerText = `Welcome back, ${localStorage.getItem('userName')}!`; // Show greeting
+            } else if (sectionId === 'patientInfo') {
+                console.log('Displaying patient info section');
+                document.getElementById('patient-info').style.display = 'block';
+                document.getElementById('greeting').innerText = ''; // Clear greeting
+            } else if (sectionId === 'papers') {
+                console.log('Displaying publications section');
+                document.getElementById('papers').style.display = 'block';
+                document.getElementById('greeting').innerText = ''; // Clear greeting
+            }
+        }
+
+            
+
+
+        // Wait for the DOM to be loaded before running the script
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded triggered');
+            // Initial display setup (e.g., set homepage as the default section to display)
+            handleLinkClick('homepage');
+            
+            // Attach event listeners to sidebar links
+            document.getElementById('homepage-link').addEventListener('click', function() {
+                handleLinkClick('homepage');
+            });
+
+            document.getElementById('patient-info-link').addEventListener('click', function() {
+                handleLinkClick('patientInfo');
+            });
+            document.getElementById('publications-link').addEventListener('click', function() {
+                handleLinkClick('papers');
+            });
+            
+        });
+
+
+        // Toggle profile pop-up on "My Profile" label click
+        document.getElementById('profileLabel').addEventListener('click', function(event) {
+            // Do not prevent the default behavior (link behavior if it's a link)
+            
+            const profilePopup = document.getElementById('profile-popup');
+            const profileLabel = document.getElementById('profileLabel');
+            
+            // Toggle the 'show' class to display the profile pop-up
+            profilePopup.classList.toggle('show');
+            
+            // Adjust the position of the label based on the pop-up's visibility
+            if (profilePopup.classList.contains('show')) {
+                profileLabel.style.right = '260px'; // Move label along with popup
+            } else {
+                profileLabel.style.right = '-90px'; // Move label back offscreen
+            }
+        });
+
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+        // Toggle visibility of sections
+        const toggleButtons = document.querySelectorAll('.toggle-btn');
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const isHidden = content.style.display === 'none' || !content.style.display;
+                content.style.display = isHidden ? 'block' : 'none';
+            });
+        });
+
+        
+
+        // Handle file uploads
+        function handleFileUpload(inputId, listId) {
+            const input = document.getElementById(inputId);
+            const list = document.getElementById(listId);
+
+            input.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file && file.type === 'application/pdf') {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = file.name;
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'Remove';
+                    removeBtn.addEventListener('click', () => {
+                        listItem.remove();
+                    });
+
+                    listItem.appendChild(removeBtn);
+                    list.appendChild(listItem);
+
+                    // Reset the file input
+                    input.value = '';
+                } else {
+                    alert('Please upload a valid PDF file.');
+                }
+            });
+        }
+
+        // Apply to all sections
+        handleFileUpload('upload-license', 'licenses-list');
+        handleFileUpload('upload-oncology-cert', 'oncology-certification-list');
+        handleFileUpload('upload-first-aid', 'first-aid-list');
+        handleFileUpload('upload-children-check', 'children-check-list');
+        handleFileUpload('upload-other', 'other-list');
+        });
+
+        // Global variable to store mutation data
+        let mutations = [];
+        // Make patients global so it can be accessed for search
+        let patients = [];  
+
+        // SQL.js integration for accessing the SQLite database
+        async function loadDatabase() {
+            const SQL = await initSqlJs({
+                locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.6.2/dist/${file}`
+            });
+
+            // Fetch the SQLite database file (Patient.db)
+            const response = await fetch('Patient.db');
+            const arrayBuffer = await response.arrayBuffer();
+            const db = new SQL.Database(new Uint8Array(arrayBuffer));
+
+            // Query the database for MutationalProfiles table
+            const mutationQuery = "SELECT * FROM MutationalProfiles";
+            const mutationResult = db.exec(mutationQuery);
+
+            // Store mutations for later filtering
+            if (mutationResult.length > 0) {
+                mutations = mutationResult[0].values;
+
+                // Automatically generate a chart for the Chromosome column by default
+                generateBarChart(getColumnData(mutations, 'Chromosome'), 'Chromosome');
+            } else {
+                alert("No mutation data found.");
+            }
+        }
+
+        // Function to extract data for the selected column from the mutations data
+        function getColumnData(data, columnName) {
+            const columnIndex = getColumnIndex(columnName); // Get the column index
+            return data.map(mutation => mutation[columnIndex]); // Map data for that column
+        }
+
+        // Function to load patients from the database
+        async function loadPatients() {
+            const SQL = await initSqlJs({
+                locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.6.2/dist/${file}`
+            });
+
+            // Fetch the SQLite database file (Patient.db)
+            const response = await fetch('Patient.db');
+            const arrayBuffer = await response.arrayBuffer();
+            const db = new SQL.Database(new Uint8Array(arrayBuffer)); c
+
+            // Query the database for Patients table
+            const patientsQuery = "SELECT * FROM Patients";
+            const patientsResult = db.exec(patientsQuery);
+
+            // Ensure there are results
+            if (patientsResult.length > 0) {
+                const patients = patientsResult[0].values; // Get patient rows
+                populatePatientsTable(patients); // Populate table
+            } else {
+                alert("No patient data found.");
+            }
+        }
+
+        // Function to populate the patients table
+        function populatePatientsTable(patients) {
+            const tableBody = document.querySelector('#patients-table tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            // Populate table with patient data
+            patients.forEach(patient => {
+                const row = document.createElement('tr');
+
+                patient.forEach(cellData => {
+                    const cell = document.createElement('td');
+                    cell.textContent = cellData; // Populate each cell with data
+                    row.appendChild(cell);
+                });
+
+                tableBody.appendChild(row); // Append row to the table body
+            });
+        }
+
+        // Call loadPatients when the page is ready
+        document.addEventListener('DOMContentLoaded', loadPatients);
+
+
+        // Define the column mappings for filter options
+        const columnMappings = {
+            "ProfileID": 0,
+            "PatientID": 1,
+            "Chromosome": 2,
+            "Gene": 3,
+            "MutationLocation": 4,
+            "MutationType": 5,
+            "MutationEffect": 6,
+            "MutationStatus": 7,
+            "VariantAlleleFrequency": 8,
+            "ClinVarAnnotation": 9
+        };
+
+        // Function to get the column index based on the selected filter
+        function getColumnIndex(filterBy) {
+            return columnMappings[filterBy] || -1; // Return -1 if no match found
+        }
+        
+        label.addEventListener('click', () => {
+            popup.classList.toggle('show'); // Toggle visibility on click
+        });
+
+
+        // Generate a pie chart using Chart.js
+        function generateBarChart(data, selectedColumnName) {
+            const ctx = document.getElementById('pie-chart').getContext('2d');
+            // Count occurrences of each unique value in the selected column
+            const counts = data.reduce((acc, value) => {
+                acc[value] = (acc[value] || 0) + 1;
+                return acc;
+            }, {});
+
+            // Extract labels and values for the chart
+            const labels = Object.keys(counts);
+            const values = Object.values(counts);
+
+            // Clear any existing chart
+            if (window.myPieChart) {
+                window.myPieChart.destroy();
+            }
+
+            // Create a color gradient for the bars
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(255, 99, 132)'); // Red
+            gradient.addColorStop(0.5, 'rgba(75, 192, 192)'); // Green
+            gradient.addColorStop(1, 'rgba(54, 162, 235)'); // Blue
+
+            // Create the bar chart
+            window.myPieChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Distribution of ${selectedColumnName}`,
+                        data: values,
+                        backgroundColor: gradient, // Use the gradient for the bars
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false // Disable legend if you don't need it
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true, // Ensure the y-axis starts at 0
+                            title: {
+                                display: true,
+                                text: 'Frequency' // Set the y-axis label to 'Frequency'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+
+        // Handle search functionality
+        document.getElementById('search-btn').addEventListener('click', () => {
+            const filterBy = document.getElementById('filter').value; // Get selected filter option
+
+            // Ensure that a valid filter is selected
+            const columnIndex = getColumnIndex(filterBy);
+            if (columnIndex === -1 || filterBy === "?") {
+                alert('Please select a valid filter option.');
+                return;
+            }
+
+            // Filter mutations based on the selected filter option
+            const filteredMutations = mutations.filter(mutation => {
+                const mutationData = mutation[columnIndex]?.toString().toLowerCase(); // Safely get the column data
+                return mutationData && mutationData !== ''; // Include only non-empty values
+            });
+
+            // Extract the selected column data for the pie chart
+            const selectedColumnData = filteredMutations.map(mutation => mutation[columnIndex]);
+
+            // Generate the bar chart using the selected column data
+            generateBarChart(selectedColumnData, filterBy);
+        });
+
+        // Call loadDatabase function when the page is ready
+        window.addEventListener('DOMContentLoaded', loadDatabase);
+
+        // Function to load patients from the database
+        async function loadPatients() {
+            const SQL = await initSqlJs({
+                locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.6.2/dist/${file}`
+            });
+
+            // Fetch the SQLite database file (Patient.db)
+            const response = await fetch('Patient.db');
+            const arrayBuffer = await response.arrayBuffer();
+            const db = new SQL.Database(new Uint8Array(arrayBuffer));
+
+            // Query to get the list of all tables in the database
+            const tablesQuery = "SELECT name FROM sqlite_master WHERE type='table'";
+            const tablesResult = db.exec(tablesQuery);
+
+            // If there are no tables
+            if (tablesResult.length === 0) {
+                alert("No tables found in the database.");
+                return;
+            }
+
+            // List of all table names
+            const tables = tablesResult[0].values;
+
+            // Create a variable to hold all the combined data
+            let allPatientData = [];
+
+            // Loop through all the tables and query their data
+            for (let table of tables) {
+                const tableName = table[0];
+                const tableQuery = `SELECT * FROM ${tableName}`;
+                const tableResult = db.exec(tableQuery);
+
+                // If the table has data, combine it
+                if (tableResult.length > 0) {
+                    const tableValues = tableResult[0].values;
+                    // Assuming you're interested in the Patients table but might need data from others
+                    if (tableName === "Patients") {
+                        // Push the patients data (you can modify this as needed)
+                        allPatientData.push(...tableValues);
+                    } else {
+                        // Handle data from other tables here (you can join data or just collect it)
+                        console.log(`Data from table ${tableName}:`, tableValues);
+                    }
+                }
+            }
+
+            // Now, populate the patient table with combined data from the Patients table
+            if (allPatientData.length > 0) {
+                populatePatientsTable(allPatientData); // Populate with all patient data from the Patients table
+            } else {
+                alert("No patient data found in the 'Patients' table.");
+            }
+        }
+
+        // Function to load patients from the database
+        async function loadPatients() {
+            const SQL = await initSqlJs({
+                locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.6.2/dist/${file}`
+            });
+
+            // Fetch the SQLite database file (Patient.db)
+            const response = await fetch('Patient.db');
+            const arrayBuffer = await response.arrayBuffer();
+            const db = new SQL.Database(new Uint8Array(arrayBuffer));
+
+            // Query the database for Patients table
+            const patientsQuery = "SELECT * FROM Patients";
+            const patientsResult = db.exec(patientsQuery);
+
+            // Ensure there are results
+            if (patientsResult.length > 0) {
+                patients = patientsResult[0].values; // Get patient rows
+                populatePatientsTable(patients); // Populate table with all patients
+            } else {
+                alert("No patient data found.");
+            }
+        }
+
+        // Function to populate the patients table
+        function populatePatientsTable(patientsList) {
+            const tableBody = document.querySelector('#existing-patient-list');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            // Populate list with patient data
+            patientsList.forEach(patient => {
+                const row = document.createElement('li'); // Using <li> for the existing-patient-list
+                row.textContent = `Patient ID: ${patient[0]}, Name: ${patient[1]} ${patient[2]}, Age: ${patient[4]}, Diagnosis: ${patient[8]}`;
+                tableBody.appendChild(row); // Append row to the list
+            });
+        }
+
+
+
+        // Function to display patient details in the modal or section
+        function showPatientDetails(patient) {
+            const patientDetailsSection = document.getElementById('patient-details');
+            const patientDetailInfo = document.getElementById('patient-detail-info');
+
+            // Set the details (replace this with your desired format)
+            patientDetailInfo.innerHTML = `
+                <p><strong>Patient ID:</strong> ${patient[0]}</p>
+                <p><strong>Name:</strong> ${patient[1]} ${patient[2]}</p>
+                <p><strong>Age:</strong> ${patient[6]}</p>
+                <p><strong>Sex:</strong> ${patient[7]}</p>
+                <p><strong>Place of Birth:</strong> ${patient[5]}</p>
+                <p><strong>Country Residing:</strong> ${patient[4]}</p>
+                <p><strong>Diagnosis:</strong> ${patient[9]}</p>
+                <p><strong>Treatment:</strong> ${patient[8]}</p>
+                <p><strong>Stage:</strong> ${patient[11]}</p>
+                <p><strong>Outcome:</strong> ${patient[12]}</p>
+            `;
+
+            // Show the overlay and details section
+            document.getElementById('overlay').style.display = 'block';
+            patientDetailsSection.style.display = 'block';
+        }
+
+        // Function to close the patient details modal
+        function closePatientDetails() {
+            // Hide the overlay and details section
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('patient-details').style.display = 'none';
+        }
+
+        // Event listener for the close button
+        document.getElementById('close-details').addEventListener('click', closePatientDetails);
+
+        // Function to populate the patient list and make names clickable
+        function populatePatientsTable(patientsList) {
+            const tableBody = document.querySelector('#existing-patient-list');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            // Populate list with patient data
+            patientsList.forEach(patient => {
+                const row = document.createElement('li'); // Using <li> for the existing-patient-list
+                row.textContent = `Name: ${patient[1]} ${patient[2]}, Age: ${patient[4]}, Diagnosis: ${patient[8]}`;
+
+                // Make each name clickable
+                row.style.cursor = 'pointer';
+                row.addEventListener('click', function() {
+                    showPatientDetails(patient); // Show details when the row is clicked
+                });
+
+                tableBody.appendChild(row); // Append row to the list
+            });
+        }
+
+    // Function to filter patients based on the search input
+        function searchPatients() {
+            const searchQuery = document.querySelector('#search-input').value.toLowerCase();
+
+            // Filter patients based on the search query (search in name and diagnosis)
+            const filteredPatients = patients.filter(patient => {
+                return (
+                    patient[1].toLowerCase().includes(searchQuery) || // First name
+                    patient[2].toLowerCase().includes(searchQuery) || // Last name
+                    patient[8].toLowerCase().includes(searchQuery) // Diagnosis
+                );
+            });
+
+            // Populate table with the filtered patients
+            populatePatientsTable(filteredPatients);
+        }
+
+
+        // Event listener for Enter key in search input
+        document.querySelector('#search-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                searchPatients();
+            }
+        });
+
+        // Event listener for input changes in the search field
+        document.querySelector('#search-input').addEventListener('input', searchPatients);
+
+        // Initial population of patients when the page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            loadPatients(); // Load all patients on page load
+        });
+        // Logout functionality
+        document.getElementById("logout-btn").addEventListener("click", function() {
+            // Clear session storage or any saved data (like user details or token)
+            sessionStorage.clear();  // Clears all session storage
+            localStorage.clear();    // Clears all local storage
+            
+            // Optionally, remove cookies if you're using them
+            // document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+            
+            // Redirect user to the homepage (or login page)
+            window.location.href = "homepage.html"; // Adjust to the homepage URL
+        });
+
+
+    </script>
+
+</html>

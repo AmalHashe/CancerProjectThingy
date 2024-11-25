@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background: url('loginbg.jpg') no-repeat center center; /* Center the image */
+            background-size: cover; /* Make sure the image covers the whole viewport */
+            color: white;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            display: flex;
+            background: linear-gradient(to right, #4ca1af, #0072B5);
+            width: 80%;
+            max-width: 1000px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .login-section {
+            flex: 1;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .info-section {
+            flex: 1;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-top: 20px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        input[type="submit"] {
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .btn-start {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-start:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-section">
+            <h2>User Login</h2>
+            <form id="login-form">
+                <label for="username">Username (Email):</label>
+                <input type="text" id="username" name="username" required>
+                
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                <input type="submit" value="Login">
+                <p class="error" id="error-message"></p>
+                
+                <p>Don't have an account? <a href="Register.html" style="color: #007bff;">Register here</a>.</p>
+            </form>
+        </div>
+
+        <div class="info-section">
+            <h2>Need an Account?</h2>
+            <p>Join us to enjoy exclusive benefits and features!</p>
+            <p>Don't miss out on our amazing community!</p>
+            <button class="btn-start" onclick="window.location.href='Register.html'">Let's Get Started</button>
+        </div>
+    </div>
+
+    <script>
+        // Mock database
+        const users = [
+            { email: "john.smith@example.com", password: "password123", accountType: "oncologist" },
+            { email: "bob.jones@example.com", password: "12345abc", accountType: "researcher" },
+            { email: "charlie.taylor@example.com", password: "mypassword", accountType: "researcher" }
+        ];
+
+        // Login form submission handler
+        document.getElementById("login-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            // Get user input
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            // Find the user in the mock database
+            const user = users.find(u => u.email === username && u.password === password);
+
+            if (user) {
+                // Successful login: redirect based on account type
+                if (user.accountType === "oncologist") {
+                    window.location.href = "Oncologist.html"; // Redirect to Oncologist dashboard
+                } else if (user.accountType === "researcher") {
+                    window.location.href = "researcher.html"; // Redirect to Researcher dashboard
+                }
+            } else {
+                // Invalid login: show error message
+                document.getElementById("error-message").textContent = "Invalid username or password. Please try again.";
+            }
+        });
+    </script>
+</body>
+</html>

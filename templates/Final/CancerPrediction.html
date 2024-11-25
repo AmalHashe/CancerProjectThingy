@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancer Risk Prediction</title>
+    <style>
+        /* Basic styling for layout and form */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 200px;
+            background-color: #4ca1af;
+            padding-top: 20px;
+            border-top-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+            transition: background-color 0.3s;
+            border-radius: 5px;
+        }
+
+        .sidebar a:hover {
+            background-color: #575757;
+        }
+
+        .content {
+            margin-left: 200px;
+            padding: 20px;
+            width: 100%;
+            background-color: #f4f4f4;
+            min-height: 100vh;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 30px auto;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 98%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4ca1af;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #387e8b;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #e3f2fd;
+            color: #0d47a1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar for navigation -->
+    <div class="sidebar">
+        <a href="javascript:history.back()">Home</a> <!-- This will mimic the back arrow behavior -->
+        <a href="CancerPrediction.html">Cancer Prediction</a>
+    </div>
+
+    <!-- Main content -->
+    <div class="content">
+        <div class="form-container">
+            <h2>Cancer Risk Prediction Form</h2>
+            <form onsubmit="event.preventDefault(); submitForm();">
+                <label for="gene_expression_1">Gene Expression 1</label>
+                <input type="number" step="any" id="gene_expression_1" name="gene_expression_1" required>
+            
+                <label for="gene_expression_2">Gene Expression 2</label>
+                <input type="number" step="any" id="gene_expression_2" name="gene_expression_2" required>
+            
+                <label for="dna_methylation">DNA Methylation</label>
+                <input type="number" step="any" id="dna_methylation" name="dna_methylation" required>
+            
+                <label for="mirna_expression">miRNA Expression</label>
+                <input type="number" step="any" id="mirna_expression" name="mirna_expression" required>
+            
+                <button type="submit">Submit</button>
+            </form>
+            
+        </div>
+
+        <!-- Add this div below the form -->
+        <div id="result" style="margin-top: 20px;">
+            <!-- This section will be dynamically updated with the results -->
+        </div>
+    </div>
+
+    <script>
+        function submitForm() {
+            const data = {
+                gene_expression_1: document.getElementById("gene_expression_1").value,
+                gene_expression_2: document.getElementById("gene_expression_2").value,
+                dna_methylation: document.getElementById("dna_methylation").value,
+                mirna_expression: document.getElementById("mirna_expression").value,
+            };
+
+            console.log("Sending data:", data); // Debugging log
+
+            fetch('/process-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+                .then((response) => response.json()) // Parse JSON response
+                .then((result) => {
+                    console.log(result); // Debugging log
+
+                    if (result.status === 'success') {
+                        const accuracy = result.prediction_list; // Assuming this is the accuracy
+                        const prediction = result.prediction; // Assuming this is part of your response (modify accordingly)
+
+                        document.getElementById('result').innerHTML = `
+                            <h3>Prediction Result:</h3>
+                            <p><strong>Prediction:</strong> ${prediction}</p>
+                            <p><strong>Accuracy:</strong> ${accuracy}</p>
+                        `;
+                    } else {
+                        document.getElementById('result').innerHTML = `
+                            <h3>Error:</h3>
+                            <p>${result.message}</p>
+                        `;
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    document.getElementById('result').innerHTML = `
+                        <h3>Error:</h3>
+                        <p>Request failed. Please try again later.</p>
+                    `;
+                });
+        }
+    </script>
+</body>
+</html>
